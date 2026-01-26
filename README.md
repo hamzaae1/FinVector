@@ -1,11 +1,9 @@
 # FinVector - Budget-First Smart Shopping
 
-<<<<<<< HEAD
 **Team Cosine** | Qdrant Vector Search Hackathon 2026
-=======
-**Team Cosine** | Qdrant Vector Search Hackathon 2025
->>>>>>> e03f30945d5cb710e2e0f26cb61b32b5df2e70e9
-**Team Members:** Hamza Mhedhbi & Hachem Mastouri
+
+
+**Team Members:** Hamza MHEDHBI & Hachem MASTOURI
 
 ---
 
@@ -95,11 +93,8 @@ Qdrant handles:
 
 ```bash
 # 1. Clone and setup
-<<<<<<< HEAD
-git clone https://github.com/hamzamhedhbi/FinVector.git
 =======
-git clone <repository>
->>>>>>> e03f30945d5cb710e2e0f26cb61b32b5df2e70e9
+git clone https://github.com/hamzaae1/FinVector.git
 cd FinVector
 python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
@@ -109,11 +104,8 @@ QDRANT_URL=https://your-cluster.cloud.qdrant.io
 QDRANT_API_KEY=your-api-key
 
 # 3. Ingest data
-<<<<<<< HEAD
-python ingest_amazon.py --amazon_products_path 
 =======
 python ingest_amazon.py
->>>>>>> e03f30945d5cb710e2e0f26cb61b32b5df2e70e9
 
 # 4. Run
 uvicorn api:app --reload --port 8000
@@ -172,14 +164,8 @@ FinVector/
 
 ## Team
 
-<<<<<<< HEAD
-- **Hamza Mhedhbi** 
-- **Hachem Mastouri** 
-=======
-- **Hamza Mhedhbi** - 
-- **Hachem Mastouri** -
->>>>>>> e03f30945d5cb710e2e0f26cb61b32b5df2e70e9
-
+- **Hamza MHEDHBI** - 
+- **Hachem MASTOURI** -
 ---
 
 <p align="center"><b>Budget-First Shopping. Smarter Search. Better Value.</b></p>
