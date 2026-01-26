@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinVector - Smart Budget Shopping</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.15); }
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .tab-active { border-bottom: 3px solid #667eea; color: #667eea; }
+        .drop-zone { border: 2px dashed #cbd5e1; transition: all 0.3s; }
+        .drop-zone:hover, .drop-zone.dragover { border-color: #667eea; background: #f0f4ff; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="gradient-bg text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-wallet text-3xl"></i>
+                    <div>
+                        <h1 class="text-2xl font-bold">FinVector</h1>
+                        <p class="text-purple-200 text-sm">Budget-First Shopping</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span id="userBadge" class="bg-white/20 px-3 py-1 rounded-full text-sm cursor-pointer" onclick="showUserProfile()">
+                        <i class="fas fa-user mr-1"></i>
+                        <span id="userId">Guest</span>
+                    </span>
+                    <span class="bg-white/20 px-3 py-1 rounded-full text-sm">
+                        <i class="fas fa-database mr-1"></i>
+                        50K+ Products
+                    </span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Search Tabs -->
+    <div class="bg-white border-b shadow-sm">
+        <div class="container mx-auto px-4">
+            <div class="flex space-x-8">
+                <button onclick="switchTab('text')" id="tabText" class="py-4 px-2 font-medium tab-active">
+                    <i class="fas fa-search mr-2"></i>Text Search
+                </button>
+                <button onclick="switchTab('image')" id="tabImage" class="py-4 px-2 font-medium text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-camera mr-2"></i>Visual Search
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Section -->
+    <section class="bg-gray-100 py-6">
+        <div class="container mx-auto px-4">
+            <!-- Text Search Panel -->
+            <div id="textSearchPanel" class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="flex-1 relative">
+                        <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" id="searchInput" placeholder="What are you looking for? (e.g., winter jacket, running shoes...)"
+                            class="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none text-lg">
+                    </div>
+                    <div class="relative w-full md:w-40">
+                        <i class="fas fa-dollar-sign absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input type="number" id="budgetInput" placeholder="Budget" value="200" min="1"
+                            class="w-full pl-10 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none text-lg">
+                    </div>
+                    <div class="relative w-full md:w-36">
+                        <i class="fas fa-star absolute left-4 top-1/2 -translate-y-1/2 text-yellow-400"></i>
+                        <select id="ratingInput" class="w-full pl-10 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none text-lg appearance-none bg-white">
+                            <option value="0">Any Rating</option>
+                            <option value="3">3+ Stars</option>
+                            <option value="4" selected>4+ Stars</option>
+                            <option value="4.5">4.5+ Stars</option>
+                        </select>
+                    </div>
+                    <button onclick="performSearch()" class="gradient-bg text-white px-8 py-4 rounded-xl font-semibold hover:opacity-90 flex items-center justify-center space-x-2">
+                        <i class="fas fa-search"></i><span>Search</span>
+                    </button>
+                </div>
+                <div class="mt-4 flex flex-wrap gap-2">
+                    <span class="text-gray-500 text-sm">Try:</span>
+                    <button onclick="quickSearch('winter jacket warm', 100)" class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm hover:bg-purple-200">Winter Jacket</button>
+                    <button onclick="quickSearch('running shoes comfortable', 80)" class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm hover:bg-purple-200">Running Shoes</button>
+                    <button onclick="quickSearch('travel suitcase luggage', 150)" class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm hover:bg-purple-200">Travel Suitcase</button>
+                    <button onclick="quickSearch('gaming headset', 100)" class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm hover:bg-purple-200">Gaming Headset</button>
+                    <button onclick="quickSearch('mens watch stylish', 150)" class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm hover:bg-purple-200">Men's Watch</button>
+                </div>
+            </div>
+
+            <!-- Image Search Panel -->
+            <div id="imageSearchPanel" class="bg-white rounded-xl shadow-lg p-6 hidden">
+                <div class="flex flex-col md:flex-row gap-6">
+                    <div class="flex-1">
+                        <div id="dropZone" class="drop-zone rounded-xl p-8 text-center cursor-pointer" onclick="document.getElementById('imageInput').click()">
+                            <input type="file" id="imageInput" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
+                            <div id="uploadPrompt">
+                                <i class="fas fa-cloud-upload-alt text-5xl text-gray-400 mb-4"></i>
+                                <p class="text-gray-600 font-medium">Drop an image here or click to upload</p>
+                                <p class="text-gray-400 text-sm mt-2">Find similar products by image</p>
+                            </div>
+                            <div id="imagePreview" class="hidden">
+                                <img id="previewImg" class="max-h-48 mx-auto rounded-lg shadow">
+                                <p class="text-sm text-gray-500 mt-2">Click to change image</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="md:w-64 space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Max Budget</label>
+                            <div class="relative">
+                                <i class="fas fa-dollar-sign absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                <input type="number" id="imageBudgetInput" value="200" class="w-full pl-8 pr-4 py-3 border rounded-lg">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Or describe what you want</label>
+                            <input type="text" id="imageTextInput" placeholder="e.g., similar but cheaper" class="w-full px-4 py-3 border rounded-lg">
+                        </div>
+                        <button onclick="performImageSearch()" class="w-full gradient-bg text-white py-3 rounded-lg font-semibold hover:opacity-90">
+                            <i class="fas fa-search mr-2"></i>Find Similar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Typo Correction Banner -->
+        <div id="typoCorrectionBanner" class="hidden mb-4 p-3 bg-blue-50 border border-blue-200 rounded-xl">
+            <div class="flex items-center gap-2">
+                <i class="fas fa-spell-check text-blue-500"></i>
+                <span class="text-gray-700">Showing results for <strong id="correctedQueryDisplay" class="text-blue-700"></strong></span>
+                <span class="text-gray-500 text-sm">(searched instead of "<span id="originalQueryDisplay" class="line-through"></span>")</span>
+            </div>
+        </div>
+
+        <!-- Exclusion Banner -->
+        <div id="exclusionBanner" class="hidden mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl">
+            <div class="flex items-center gap-2">
+                <i class="fas fa-filter text-amber-500"></i>
+                <span class="text-gray-700">Excluding products with: <strong id="excludedTermsDisplay" class="text-amber-700"></strong></span>
+            </div>
+        </div>
+
+        <!-- Results Header -->
+        <div id="resultsHeader" class="hidden mb-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800"><span id="resultsCount">0</span> Products Found</h2>
+                    <p class="text-gray-500">Within your budget of $<span id="budgetDisplay">0</span> <span id="personalizedBadge" class="hidden ml-2 text-purple-600"><i class="fas fa-magic"></i> Personalized</span></p>
+                </div>
+                <div class="flex items-center space-x-4 text-sm text-gray-500">
+                    <span><i class="fas fa-bolt text-yellow-500"></i> <span id="responseTime">0</span>ms</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div id="loadingSkeleton" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div class="bg-white rounded-xl shadow-md overflow-hidden"><div class="skeleton h-48 w-full"></div><div class="p-4 space-y-3"><div class="skeleton h-4 w-3/4 rounded"></div><div class="skeleton h-4 w-1/2 rounded"></div></div></div>
+            <div class="bg-white rounded-xl shadow-md overflow-hidden"><div class="skeleton h-48 w-full"></div><div class="p-4 space-y-3"><div class="skeleton h-4 w-3/4 rounded"></div><div class="skeleton h-4 w-1/2 rounded"></div></div></div>
+            <div class="bg-white rounded-xl shadow-md overflow-hidden"><div class="skeleton h-48 w-full"></div><div class="p-4 space-y-3"><div class="skeleton h-4 w-3/4 rounded"></div><div class="skeleton h-4 w-1/2 rounded"></div></div></div>
+            <div class="bg-white rounded-xl shadow-md overflow-hidden"><div class="skeleton h-48 w-full"></div><div class="p-4 space-y-3"><div class="skeleton h-4 w-3/4 rounded"></div><div class="skeleton h-4 w-1/2 rounded"></div></div></div>
+        </div>
+
+        <!-- Products Grid -->
+        <div id="productsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden text-center py-16">
+            <i class="fas fa-search text-6xl text-gray-300 mb-4"></i>
+            <h3 class="text-xl font-semibold text-gray-600 mb-2">No products found</h3>
+            <p class="text-gray-500">Try adjusting your search or increasing your budget</p>
+        </div>
+
+        <!-- Welcome State -->
+        <div id="welcomeState" class="text-center py-12">
+            <div class="max-w-4xl mx-auto">
+                <i class="fas fa-wallet text-6xl text-purple-500 mb-6"></i>
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Budget-First Shopping</h2>
+                <p class="text-gray-600 text-lg mb-8">Search for products and we'll show you only what fits your budget. No more falling in love with things you can't afford!</p>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-left">
+                    <div class="bg-white p-5 rounded-xl shadow-md">
+                        <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mb-3"><i class="fas fa-brain text-purple-600"></i></div>
+                        <h3 class="font-semibold text-gray-800 mb-1">Smart Search</h3>
+                        <p class="text-gray-600 text-sm">Understands "laptop for programming"</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl shadow-md">
+                        <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mb-3"><i class="fas fa-filter text-green-600"></i></div>
+                        <h3 class="font-semibold text-gray-800 mb-1">Budget Filter</h3>
+                        <p class="text-gray-600 text-sm">Never shows over-budget items</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl shadow-md">
+                        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-3"><i class="fas fa-exchange-alt text-blue-600"></i></div>
+                        <h3 class="font-semibold text-gray-800 mb-1">Alternatives</h3>
+                        <p class="text-gray-600 text-sm">Find cheaper similar products</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl shadow-md">
+                        <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center mb-3"><i class="fas fa-magic text-yellow-600"></i></div>
+                        <h3 class="font-semibold text-gray-800 mb-1">Budget Stretcher</h3>
+                        <p class="text-gray-600 text-sm">Get more for your money</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Alternatives Modal -->
+    <div id="alternativesModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+            <div class="p-6 border-b bg-gradient-to-r from-green-500 to-emerald-600 text-white">
+                <div class="flex items-center justify-between">
+                    <div><h3 class="text-xl font-bold">Smart Alternatives</h3><p class="text-green-100">Similar products at lower prices</p></div>
+                    <button onclick="closeModal('alternativesModal')" class="text-white/80 hover:text-white"><i class="fas fa-times text-2xl"></i></button>
+                </div>
+            </div>
+            <div class="p-6 overflow-y-auto max-h-[60vh]">
+                <div id="originalProduct" class="mb-6 p-4 bg-gray-100 rounded-xl"></div>
+                <div class="flex items-center justify-between mb-4">
+                    <h4 class="font-semibold text-gray-800"><i class="fas fa-arrow-down text-green-500 mr-2"></i>Save money with these alternatives:</h4>
+                    <div class="flex items-center gap-2">
+                        <label class="text-sm text-gray-500">Sort by:</label>
+                        <select id="alternativesSortBy" onchange="refreshAlternatives()" class="px-3 py-1 border rounded-lg text-sm focus:outline-none focus:border-green-500">
+                            <option value="similarity">Most Similar</option>
+                            <option value="price_low">Cheapest First</option>
+                            <option value="rating">Highest Rated</option>
+                            <option value="value">Best Value</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="alternativesList" class="space-y-4"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Budget Stretcher Modal -->
+    <div id="stretcherModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+            <div class="p-6 border-b bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+                <div class="flex items-center justify-between">
+                    <div><h3 class="text-xl font-bold"><i class="fas fa-magic mr-2"></i>Budget Stretcher</h3><p class="text-purple-100">Get more value from your budget</p></div>
+                    <div class="flex items-center gap-3">
+                        <select id="stretcherSortBy" onchange="refreshStretcher()" class="px-3 py-1 bg-white/20 border border-white/30 rounded-lg text-sm text-white focus:outline-none">
+                            <option value="value" class="text-gray-800">Best Value</option>
+                            <option value="similarity" class="text-gray-800">Most Similar</option>
+                            <option value="price_low" class="text-gray-800">Cheapest</option>
+                            <option value="rating" class="text-gray-800">Top Rated</option>
+                        </select>
+                        <button onclick="closeModal('stretcherModal')" class="text-white/80 hover:text-white"><i class="fas fa-times text-2xl"></i></button>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 overflow-y-auto max-h-[60vh]" id="stretcherContent"></div>
+        </div>
+    </div>
+
+    <!-- User Profile Modal -->
+    <div id="profileModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+            <div class="p-6 border-b bg-gradient-to-r from-blue-500 to-cyan-500 text-white">
+                <div class="flex items-center justify-between">
+                    <div><h3 class="text-xl font-bold"><i class="fas fa-user mr-2"></i>Your Profile</h3><p class="text-blue-100">Personalization & Preferences</p></div>
+                    <button onclick="closeModal('profileModal')" class="text-white/80 hover:text-white"><i class="fas fa-times text-2xl"></i></button>
+                </div>
+            </div>
+            <div class="p-6" id="profileContent">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Your User ID</label>
+                    <input type="text" id="userIdInput" placeholder="Enter a username" class="w-full px-4 py-2 border rounded-lg">
+                </div>
+                <button onclick="setUserId()" class="w-full gradient-bg text-white py-2 rounded-lg font-semibold">Save & Enable Personalization</button>
+                <div id="profileStats" class="mt-6 hidden"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-gray-400 py-6">
+        <div class="container mx-auto px-4 text-center">
+            <p><i class="fas fa-code mr-2"></i>Built by <span class="text-white">Team Cosine</span> - Hamza & Hachem</p>
+            <p class="text-sm mt-1">Qdrant Vector Search Hackathon 2026</p>
+        </div>
+    </footer>
+
+    <script>
+        const API_URL = 'http://localhost:8000';
+        let currentQuery = '';
+        let userId = localStorage.getItem('finvector_user_id') || '';
+
+        // Store current modal context for refresh
+        let currentAlternative = { productId: null, title: '', price: 0 };
+        let currentStretcher = { productId: null, title: '', price: 0 };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            if (userId) document.getElementById('userId').textContent = userId;
+            setupDragDrop();
+        });
+
+        // Tab switching
+        function switchTab(tab) {
+            document.getElementById('tabText').classList.toggle('tab-active', tab === 'text');
+            document.getElementById('tabText').classList.toggle('text-gray-500', tab !== 'text');
+            document.getElementById('tabImage').classList.toggle('tab-active', tab === 'image');
+            document.getElementById('tabImage').classList.toggle('text-gray-500', tab !== 'image');
+            document.getElementById('textSearchPanel').classList.toggle('hidden', tab !== 'text');
+            document.getElementById('imageSearchPanel').classList.toggle('hidden', tab !== 'image');
+        }
+
+        // Quick search
+        function quickSearch(query, budget) {
+            document.getElementById('searchInput').value = query;
+            document.getElementById('budgetInput').value = budget;
+            performSearch();
+        }
+
+        // Main search - uses smart search with query understanding
+        async function performSearch() {
+            const query = document.getElementById('searchInput').value.trim();
+            const budget = parseFloat(document.getElementById('budgetInput').value) || null;
+            const minRating = parseFloat(document.getElementById('ratingInput').value) || null;
+            if (!query) return alert('Please enter a search query');
+
+            currentQuery = query;
+            showLoading();
+
+            const startTime = Date.now();
+            try {
+                // Use smart search endpoint - it understands natural language!
+                const body = {
+                    query: query,
+                    max_budget: budget,  // Can be null - smart search extracts from query
+                    min_rating: minRating,  // Can be null - smart search uses intent
+                    limit: 20
+                };
+
+                const response = await fetch(`${API_URL}/search/smart`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                const data = await response.json();
+
+                document.getElementById('loadingSkeleton').classList.add('hidden');
+                if (data.success && data.results.length > 0) {
+                    displayProducts(data.results);
+
+                    // Show query understanding info
+                    const u = data.understanding;
+                    document.getElementById('resultsCount').textContent = data.count;
+                    document.getElementById('budgetDisplay').textContent = u.effective_budget.toFixed(0);
+                    document.getElementById('responseTime').textContent = Date.now() - startTime;
+                    document.getElementById('resultsHeader').classList.remove('hidden');
+
+                    // Show typo correction banner if corrections were made
+                    if (u.corrected_query && Object.keys(u.corrections).length > 0) {
+                        document.getElementById('correctedQueryDisplay').textContent = u.corrected_query;
+                        document.getElementById('originalQueryDisplay').textContent = u.original_query;
+                        document.getElementById('typoCorrectionBanner').classList.remove('hidden');
+                    } else {
+                        document.getElementById('typoCorrectionBanner').classList.add('hidden');
+                    }
+
+                    // Show exclusion banner if terms were excluded
+                    if (u.excluded_terms && u.excluded_terms.length > 0) {
+                        document.getElementById('excludedTermsDisplay').textContent = u.excluded_terms.join(', ');
+                        document.getElementById('exclusionBanner').classList.remove('hidden');
+                    } else {
+                        document.getElementById('exclusionBanner').classList.add('hidden');
+                    }
+
+                    // Show understanding badge - always show what AI understood
+                    const intentLabels = {
+                        'quality': 'Top Rated',
+                        'budget': 'Best Value',
+                        'balanced': 'Quality + Value',
+                        'value': 'Smart Value',
+                        'gift': 'Gift Ready',
+                        'professional': 'Work Ready',
+                        'discovery': 'Exploring'
+                    };
+                    const intentLabel = intentLabels[u.detected_intent] || 'Smart Search';
+                    document.getElementById('personalizedBadge').classList.remove('hidden');
+                    document.getElementById('personalizedBadge').innerHTML = `<i class="fas fa-brain"></i> ${intentLabel}`;
+                    document.getElementById('personalizedBadge').title = `Query enhanced: "${u.enhanced_query.substring(0, 60)}..." | Min rating: ${u.min_rating_applied}★`;
+                } else {
+                    document.getElementById('emptyState').classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error(error);
+                document.getElementById('loadingSkeleton').classList.add('hidden');
+                document.getElementById('emptyState').classList.remove('hidden');
+            }
+        }
+
+        function showLoading() {
+            document.getElementById('welcomeState').classList.add('hidden');
+            document.getElementById('emptyState').classList.add('hidden');
+            document.getElementById('productsGrid').innerHTML = '';
+            document.getElementById('loadingSkeleton').classList.remove('hidden');
+            document.getElementById('resultsHeader').classList.add('hidden');
+            document.getElementById('typoCorrectionBanner').classList.add('hidden');
+            document.getElementById('exclusionBanner').classList.add('hidden');
+        }
+
+        // Display products
+        function displayProducts(products) {
+            const grid = document.getElementById('productsGrid');
+            grid.innerHTML = products.map((p, i) => `
+                <div class="bg-white rounded-xl shadow-md overflow-hidden card-hover transition-all duration-300 fade-in" style="animation-delay:${i*50}ms" onclick="recordClick('${p.product_id}', ${JSON.stringify(p).replace(/"/g, '&quot;')})">
+                    <div class="h-48 bg-gray-100 flex items-center justify-center relative overflow-hidden">
+                        ${p.image_url ? `<img src="${p.image_url}" alt="${p.title}" class="h-full w-full object-contain bg-white" onerror="this.onerror=null; this.src=''; this.classList.add('hidden'); this.nextElementSibling.classList.remove('hidden');">
+                        <div class="hidden absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200"><i class="fas fa-image text-4xl text-gray-300"></i></div>` :
+                        `<div class="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200"><i class="fas fa-image text-4xl text-gray-300"></i></div>`}
+                        <div class="absolute top-2 right-2">
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full ${getMatchClass(p.similarity_score)}">${Math.round(p.similarity_score*100)}%</span>
+                        </div>
+                        ${p.personalization_boost > 1 ? `<div class="absolute top-2 left-2"><span class="px-2 py-1 bg-purple-500 text-white text-xs rounded-full"><i class="fas fa-magic"></i></span></div>` : ''}
+                    </div>
+                    <div class="p-4">
+                        <span class="text-xs text-purple-600 font-medium">${p.category}</span>
+                        <div class="flex items-center text-yellow-400 text-sm float-right"><i class="fas fa-star"></i><span class="ml-1 text-gray-600">${p.rating}</span></div>
+                        <h3 class="font-semibold text-gray-800 mt-1 line-clamp-2 h-12">${p.title}</h3>
+                        <div class="flex items-center justify-between mt-3">
+                            <span class="text-2xl font-bold text-green-600">$${p.price.toFixed(2)}</span>
+                        </div>
+                        <div class="flex gap-2 mt-3">
+                            <button onclick="event.stopPropagation(); findAlternatives('${p.product_id}', '${escapeHtml(p.title)}', ${p.price})" class="flex-1 px-3 py-2 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200">
+                                <i class="fas fa-exchange-alt mr-1"></i>Alternatives
+                            </button>
+                            <button onclick="event.stopPropagation(); showBudgetStretcher('${p.product_id}', '${escapeHtml(p.title)}', ${p.price})" class="flex-1 px-3 py-2 bg-purple-100 text-purple-700 rounded-lg text-sm font-medium hover:bg-purple-200">
+                                <i class="fas fa-magic mr-1"></i>Stretch
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getMatchClass(score) {
+            if (score > 0.8) return 'bg-green-500 text-white';
+            if (score > 0.6) return 'bg-green-400 text-white';
+            if (score > 0.4) return 'bg-yellow-400 text-gray-800';
+            return 'bg-gray-400 text-white';
+        }
+
+        function escapeHtml(text) { return text.replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
+
+        // Record click for feedback
+        async function recordClick(productId, productData) {
+            if (!userId) return;
+            try {
+                await fetch(`${API_URL}/feedback/interaction`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        product_id: productId,
+                        action: 'click',
+                        product_data: { category: productData.category, price: productData.price, title: productData.title },
+                        query: currentQuery
+                    })
+                });
+            } catch (e) { console.log('Feedback error:', e); }
+        }
+
+        // Alternatives
+        async function findAlternatives(productId, title, price, sortBy = null) {
+            // Store context for refresh
+            currentAlternative = { productId, title, price };
+
+            document.getElementById('alternativesModal').classList.remove('hidden');
+            document.getElementById('originalProduct').innerHTML = `
+                <div class="flex items-center justify-between">
+                    <div><p class="text-sm text-gray-500">Original Product</p><p class="font-semibold text-gray-800">${title}</p></div>
+                    <span class="text-xl font-bold text-gray-600">$${price.toFixed(2)}</span>
+                </div>`;
+            document.getElementById('alternativesList').innerHTML = '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-3xl text-purple-500"></i></div>';
+
+            // Get sort preference
+            const sort = sortBy || document.getElementById('alternativesSortBy').value;
+
+            try {
+                const response = await fetch(`${API_URL}/alternatives`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        product_id: productId,
+                        max_budget: price * 0.95,
+                        min_rating: 3.5,
+                        limit: 5,
+                        sort_by: sort
+                    })
+                });
+                const data = await response.json();
+
+                if (data.success && data.alternatives.length > 0) {
+                    document.getElementById('alternativesList').innerHTML = data.alternatives.map(alt => `
+                        <div class="p-4 bg-gray-50 rounded-xl flex items-center gap-4 hover:bg-gray-100 cursor-pointer">
+                            <div class="w-16 h-16 bg-white rounded-lg overflow-hidden flex-shrink-0">
+                                ${alt.image_url ? `<img src="${alt.image_url}" alt="${alt.title}" class="w-full h-full object-contain" onerror="this.src=''; this.parentElement.innerHTML='<i class=\\'fas fa-image text-gray-300 text-xl\\'></i>';">` :
+                                `<div class="w-full h-full flex items-center justify-center"><i class="fas fa-image text-gray-300"></i></div>`}
+                            </div>
+                            <div class="flex-1"><p class="font-medium text-gray-800">${alt.title}</p>
+                            <div class="flex items-center space-x-3 mt-1">
+                                <span class="text-sm text-gray-500">${Math.round(alt.similarity_score*100)}% similar</span>
+                                <span class="text-yellow-500 text-sm"><i class="fas fa-star"></i> ${alt.rating}</span>
+                            </div></div>
+                            <div class="text-right">
+                                <p class="text-xl font-bold text-green-600">${alt.price_available ? '$' + alt.price.toFixed(2) : 'Price N/A'}</p>
+                                ${alt.savings !== null ? `<p class="text-sm text-green-500 font-medium"><i class="fas fa-arrow-down"></i> Save $${alt.savings.toFixed(2)}</p>` : ''}
+                            </div>
+                        </div>`).join('');
+                } else {
+                    document.getElementById('alternativesList').innerHTML = '<div class="text-center py-8 text-gray-500"><i class="fas fa-info-circle text-3xl mb-2"></i><p>No cheaper alternatives found</p></div>';
+                }
+            } catch (e) {
+                document.getElementById('alternativesList').innerHTML = '<div class="text-center py-8 text-red-500">Error finding alternatives</div>';
+            }
+        }
+
+        function refreshAlternatives() {
+            if (currentAlternative.productId) {
+                findAlternatives(currentAlternative.productId, currentAlternative.title, currentAlternative.price);
+            }
+        }
+
+        // Budget Stretcher
+        async function showBudgetStretcher(productId, title, price, sortBy = null) {
+            // Store context for refresh
+            currentStretcher = { productId, title, price };
+
+            document.getElementById('stretcherModal').classList.remove('hidden');
+            document.getElementById('stretcherContent').innerHTML = '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-3xl text-purple-500"></i><p class="mt-2 text-gray-500">Finding ways to stretch your budget...</p></div>';
+
+            // Get sort preference
+            const sort = sortBy || document.getElementById('stretcherSortBy').value;
+
+            try {
+                const response = await fetch(`${API_URL}/budget-stretcher`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        product_id: productId,
+                        total_budget: price * 1.1,
+                        sort_by: sort
+                    })
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    const altPrice = data.alternative.price_available ? `$${data.alternative.price.toFixed(2)}` : 'Price N/A';
+                    document.getElementById('stretcherContent').innerHTML = `
+                        <div class="mb-6 p-4 bg-gray-100 rounded-xl">
+                            <p class="text-sm text-gray-500">You're viewing</p>
+                            <p class="font-semibold text-gray-800">${data.original.title}</p>
+                            <p class="text-xl font-bold text-gray-600">$${data.original.price.toFixed(2)}</p>
+                        </div>
+                        <div class="bg-green-50 border border-green-200 rounded-xl p-4 mb-4">
+                            <h4 class="font-semibold text-green-800 mb-2"><i class="fas fa-lightbulb mr-2"></i>Budget Stretcher Suggestion</h4>
+                            <p class="text-green-700">Choose <strong>${data.alternative.title}</strong> at <strong>${altPrice}</strong> instead, and your <strong>$${data.savings.toFixed(2)} savings</strong> lets you also get:</p>
+                        </div>
+                        <div class="space-y-2 mb-4">
+                            ${data.complementary_products.map(p => `
+                                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                                    <div class="w-12 h-12 bg-white rounded overflow-hidden flex-shrink-0">
+                                        ${p.image_url ? `<img src="${p.image_url}" alt="${p.title}" class="w-full h-full object-contain">` :
+                                        `<div class="w-full h-full flex items-center justify-center"><i class="fas fa-plus text-purple-400"></i></div>`}
+                                    </div>
+                                    <div class="flex-1 min-w-0"><span class="block truncate">${p.title}</span></div>
+                                    <span class="font-semibold flex-shrink-0">${p.price_available ? '$' + p.price.toFixed(2) : 'N/A'}</span>
+                                </div>`).join('')}
+                        </div>
+                        <div class="bg-purple-100 rounded-xl p-4 text-center">
+                            <p class="text-purple-800 font-semibold">Bundle Total: <span class="text-2xl">$${data.bundle_total.toFixed(2)}</span></p>
+                            <p class="text-purple-600 text-sm">${data.within_budget ? '✓ Within your budget!' : 'Slightly over budget'}</p>
+                        </div>`;
+                } else {
+                    document.getElementById('stretcherContent').innerHTML = `<div class="text-center py-8 text-gray-500"><i class="fas fa-info-circle text-3xl mb-2"></i><p>${data.message || 'No suggestions available'}</p></div>`;
+                }
+            } catch (e) {
+                document.getElementById('stretcherContent').innerHTML = '<div class="text-center py-8 text-red-500">Error getting suggestions</div>';
+            }
+        }
+
+        function refreshStretcher() {
+            if (currentStretcher.productId) {
+                showBudgetStretcher(currentStretcher.productId, currentStretcher.title, currentStretcher.price);
+            }
+        }
+
+        // Image search
+        function setupDragDrop() {
+            const dropZone = document.getElementById('dropZone');
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(e => dropZone.addEventListener(e, ev => ev.preventDefault()));
+            ['dragenter', 'dragover'].forEach(e => dropZone.addEventListener(e, () => dropZone.classList.add('dragover')));
+            ['dragleave', 'drop'].forEach(e => dropZone.addEventListener(e, () => dropZone.classList.remove('dragover')));
+            dropZone.addEventListener('drop', e => { if (e.dataTransfer.files.length) handleImageFile(e.dataTransfer.files[0]); });
+        }
+
+        function handleImageUpload(e) { if (e.target.files.length) handleImageFile(e.target.files[0]); }
+
+        function handleImageFile(file) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                document.getElementById('previewImg').src = e.target.result;
+                document.getElementById('uploadPrompt').classList.add('hidden');
+                document.getElementById('imagePreview').classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function performImageSearch() {
+            const fileInput = document.getElementById('imageInput');
+            const textQuery = document.getElementById('imageTextInput').value.trim();
+            const budget = parseFloat(document.getElementById('imageBudgetInput').value) || 200;
+
+            if (!fileInput.files.length && !textQuery) return alert('Please upload an image or enter a description');
+
+            showLoading();
+            try {
+                let response;
+                if (fileInput.files.length) {
+                    // Image uploaded - use hybrid endpoint (handles both image-only and image+text)
+                    const formData = new FormData();
+                    formData.append('file', fileInput.files[0]);
+                    formData.append('text_query', textQuery);  // Pass text query (can be empty)
+                    formData.append('max_budget', budget);
+                    formData.append('min_rating', 0);
+                    formData.append('limit', 12);
+                    formData.append('image_weight', 0.7);
+                    response = await fetch(`${API_URL}/search/hybrid/upload`, { method: 'POST', body: formData });
+                } else {
+                    // Text only - search by text against image embeddings
+                    response = await fetch(`${API_URL}/search/image/text`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ query: textQuery, max_budget: budget, limit: 12 })
+                    });
+                }
+                const data = await response.json();
+                document.getElementById('loadingSkeleton').classList.add('hidden');
+                if (data.success && data.results.length > 0) {
+                    displayProducts(data.results);
+                    document.getElementById('resultsCount').textContent = data.count;
+                    document.getElementById('budgetDisplay').textContent = budget;
+                    document.getElementById('resultsHeader').classList.remove('hidden');
+                } else {
+                    document.getElementById('emptyState').classList.remove('hidden');
+                }
+            } catch (e) {
+                console.error(e);
+                document.getElementById('loadingSkeleton').classList.add('hidden');
+                document.getElementById('emptyState').classList.remove('hidden');
+            }
+        }
+
+        // User profile
+        function showUserProfile() {
+            document.getElementById('profileModal').classList.remove('hidden');
+            document.getElementById('userIdInput').value = userId;
+            if (userId) loadProfileStats();
+        }
+
+        async function loadProfileStats() {
+            try {
+                const response = await fetch(`${API_URL}/feedback/profile/${userId}`);
+                const data = await response.json();
+                if (data.success) {
+                    const p = data.profile;
+                    document.getElementById('profileStats').classList.remove('hidden');
+                    document.getElementById('profileStats').innerHTML = `
+                        <div class="border-t pt-4">
+                            <h4 class="font-semibold text-gray-800 mb-3">Your Preferences</h4>
+                            <div class="space-y-2 text-sm">
+                                <p><i class="fas fa-mouse-pointer text-blue-500 mr-2"></i>Interactions: ${p.interaction_count}</p>
+                                <p><i class="fas fa-dollar-sign text-green-500 mr-2"></i>Avg. Price Viewed: $${p.avg_price_viewed}</p>
+                                ${p.top_categories.length ? `<p><i class="fas fa-tags text-purple-500 mr-2"></i>Top Categories: ${p.top_categories.map(c => c.category).join(', ')}</p>` : ''}
+                            </div>
+                        </div>`;
+                }
+            } catch (e) { console.log('Profile error:', e); }
+        }
+
+        function setUserId() {
+            const newId = document.getElementById('userIdInput').value.trim();
+            if (newId) {
+                userId = newId;
+                localStorage.setItem('finvector_user_id', userId);
+                document.getElementById('userId').textContent = userId;
+                loadProfileStats();
+                alert('Personalization enabled! Your preferences will improve recommendations.');
+            }
+        }
+
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        // Keyboard shortcuts
+        document.getElementById('searchInput').addEventListener('keypress', e => { if (e.key === 'Enter') performSearch(); });
+    </script>
+</body>
+</html>

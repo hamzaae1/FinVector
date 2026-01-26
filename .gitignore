@@ -1,0 +1,51 @@
+# ======================
+# Python
+# ======================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# ======================
+# Virtual environment
+# ======================
+venv/
+.env
+.env.*
+
+# ======================
+# Logs & runtime files
+# ======================
+logs/
+*.log
+
+# ======================
+# OS / Editor junk
+# ======================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# ======================
+# Test / cache artifacts
+# ======================
+.pytest_cache/
+.mypy_cache/
+.cache/
+
+# ======================
+# Data & generated files
+# ======================
+benchmark_report.json
+
+
+products.csv
+amazon_sample_pod_cat.csv
+# ======================
+# Model / vector DB artifacts
+# ======================
+qdrant_storage/
+*.bin
+*.index
+
