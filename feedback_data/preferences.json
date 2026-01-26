@@ -1,0 +1,39 @@
+{
+  "demo_user": {
+    "categories": {
+      "Men's Shoes": 1.0
+    },
+    "price_range": {
+      "min": 49.99,
+      "max": 49.99,
+      "avg_viewed": [
+        49.99
+      ]
+    },
+    "brands": {},
+    "interaction_count": 1,
+    "last_active": "2026-01-25T10:43:34.279700"
+  },
+  "1234": {
+    "categories": {
+      "Xbox 360 Games, Consoles & Accessories": 4.0,
+      "Men's Clothing": 3.0
+    },
+    "price_range": {
+      "min": 15.88,
+      "max": 154.4,
+      "avg_viewed": [
+        154.4,
+        154.4,
+        21.99,
+        45.99,
+        129.99,
+        15.88,
+        59.48
+      ]
+    },
+    "brands": {},
+    "interaction_count": 7,
+    "last_active": "2026-01-26T20:11:21.030198"
+  }
+}

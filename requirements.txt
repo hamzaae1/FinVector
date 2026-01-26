@@ -1,0 +1,12 @@
+qdrant-client
+sentence-transformers
+pillow
+pandas
+numpy
+requests
+python-dotenv
+fastapi
+uvicorn
+python-multipart
+torch
+tqdm
