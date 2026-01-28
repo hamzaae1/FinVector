@@ -1,4 +1,4 @@
-from finvector_core import FinVectorSearch
+from app.finvector_core import FinVectorSearch
 
 # Initialize
 search = FinVectorSearch()

@@ -1,5 +1,5 @@
 """Test the alternatives feature"""
-from finvector_core import FinVectorSearch
+from app.finvector_core import FinVectorSearch
 
 search = FinVectorSearch(load_image_model=False)
 

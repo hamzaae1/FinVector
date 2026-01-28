@@ -9,9 +9,10 @@ __pycache__/
 # ======================
 # Virtual environment
 # ======================
-venv/
 .env
-.env.*
+qdrant/storage/
+qdrant/snapshots/*
+!qdrant/snapshots/*.snapshot
 
 # ======================
 # Logs & runtime files

@@ -7,8 +7,8 @@ import time
 import statistics
 import json
 from datetime import datetime
-from finvector_core import FinVectorSearch
-from performance import ModelWarmup, run_benchmark, profiler
+from .finvector_core import FinVectorSearch
+from .performance import ModelWarmup, run_benchmark, profiler
 
 def run_full_benchmark():
     """Run comprehensive performance benchmark"""

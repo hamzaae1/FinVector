@@ -4,11 +4,12 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import Optional, Literal
-from finvector_core import FinVectorSearch
+from .finvector_core import FinVectorSearch
 from PIL import Image
 from io import BytesIO
 import base64
 import os
+from .qdrant_init import wait_for_qdrant, restore_snapshot
 
 # Import analytics (optional)
 try:
@@ -32,10 +33,19 @@ app = FastAPI(
     description="Budget-Aware E-Commerce Search with Text and Image Support"
 )
 
+@app.on_event("startup")
+def startup():
+    wait_for_qdrant()
+    restore_snapshot()
+
 # Serve static files
 static_dir = os.path.join(os.path.dirname(__file__), "static")
 if os.path.exists(static_dir):
     app.mount("/static", StaticFiles(directory=static_dir), name="static")
+
+@app.get("/app")
+async def serve_frontend():
+    return FileResponse(os.path.join(static_dir, "index.html"))
 
 # Enable CORS for frontend integration
 app.add_middleware(

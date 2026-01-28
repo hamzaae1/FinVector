@@ -2,7 +2,7 @@
 FinVector - Comprehensive Feature Test Suite
 Tests all core features: text search, alternatives, budget stretcher, and image search
 """
-from finvector_core import FinVectorSearch
+from app.finvector_core import FinVectorSearch
 import requests
 from io import BytesIO
 from PIL import Image
