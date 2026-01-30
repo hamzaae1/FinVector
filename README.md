@@ -116,11 +116,14 @@ cd FinVector
 
 docker compose up --build
 
-# Working with the snapshots from our qdrant collections : 
+#### Working with the snapshots from our qdrant collections : 
+```bash
 chmod +x qdrant_data/snapshots/restore_snapshots.sh
 docker exec qdrant bash /qdrant/snapshots/restore_snapshots.sh
+```
 
-# Working with your snapshots : 
+
+#### Working with your snapshots : 
 cp path-to-your-snapshots /qdrant/snapshots/
 ```bash
 curl -X POST \
