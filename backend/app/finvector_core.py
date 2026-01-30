@@ -156,7 +156,7 @@ class FinVectorSearch:
         Returns:
             Dict with results and query understanding metadata
         """
-        from query_understanding import understand_query
+        from .query_understanding import understand_query
 
         # Parse the query
         parsed = understand_query(query, default_budget=max_budget or 200.0)

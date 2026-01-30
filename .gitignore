@@ -13,7 +13,7 @@ __pycache__/
 qdrant/storage/
 qdrant/snapshots/*
 !qdrant/snapshots/*.snapshot
-
+!qdrant/snapshot/*.sh
 # ======================
 # Logs & runtime files
 # ======================

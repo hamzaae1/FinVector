@@ -90,7 +90,7 @@ Qdrant handles:
 ---
 
 ## Quick Start
-
+Cloud Environment : 
 ```bash
 # 1. Clone and setup
 =======
@@ -103,16 +103,35 @@ pip install -r requirements.txt
 QDRANT_URL=https://your-cluster.cloud.qdrant.io
 QDRANT_API_KEY=your-api-key
 
-# 3. Ingest data
 =======
 python ingest_amazon.py
 
-# 4. Run
 uvicorn api:app --reload --port 8000
+```
+**Open:** http://localhost:8000/static/index.html
+
+Local Environment : 
+git clone https://github.com/hamzaae1/FinVector.git
+cd FinVector
+
+docker compose up --build
+
+# Working with the snapshots from our qdrant collections : 
+chmod +x qdrant_data/snapshots/restore_snapshots.sh
+docker exec qdrant bash /qdrant/snapshots/restore_snapshots.sh
+
+# Working with your snapshots : 
+cp path-to-your-snapshots /qdrant/snapshots/
+```bash
+curl -X POST \
+  "http://localhost:6333/collections/${collection}/snapshots/restore" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "snapshot": "${collection}.snapshot"
+  }'
 ```
 
 **Open:** http://localhost:8000/static/index.html
-
 ---
 
 ## API Endpoints
